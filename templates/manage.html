@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block body %}
+<table class="table" style="text-align: center;">
+    <tr>
+        <th colspan="4" style="color: red; text-align: center;"><h1>Manage services</h1></th>
+    </tr>
+    <tr>
+        <th>Name</th>
+        <th>Amount</th>
+        <th>Image</th>
+        <th>Action</th>
+    </tr>
+    {% for up in fetch %}
+    <tr>
+        <td>{{up[1]}}</td>
+        <td>Ksh {{up[2]}}</td>
+        <td><img src="data:image;base64,{{up[3]}}" alt="" height="50" width="50"></td>
+        <td>
+            <a href="/update/{{up[0]}}" class="btn btn-primary">Update</a>
+            <a href="/update/{{up[0]}}" class="btn btn-danger" onclick="return(confirm('Are you sure you want to delete service'))">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

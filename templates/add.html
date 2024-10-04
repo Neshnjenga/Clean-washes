@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="bip">
+    <form action="" method="post" enctype="multipart/form-data">
+        <input type="text" name="name" placeholder="Enter the product name" required>
+        <input type="text" name="amount" placeholder="Enter the amount of the service" required>
+        <input type="file" name="image" placeholder="Enter the image" required>
+        <div class="col-lg-3" style="margin-left: 30px;">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="bip">
+    <form action="" method="post" enctype="multipart/form-data">
+        <input type="text" name="name" placeholder="Enter the product name" value="{{data[1]}}">
+        <input type="text" name="amount" placeholder="Enter the amount of the service" value="{{data[2]}}">
+        <input type="file" name="image" placeholder="Enter the image" value="{{data[3]}}">
+        <div class="col-lg-3" style="margin-left: 30px;">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

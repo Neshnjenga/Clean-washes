@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block body %}
+<table class="table">
+    <tr >
+        <th colspan="6" ><h1 style="color: red; text-align: center;">Your current orders</h1></th>
+    </tr>
+    <tr style="color: white;">
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>Sevice</th>
+        <th>Cost</th>
+        <th>Status</th>
+    </tr>
+    {% for gig in data %}
+    <tr>
+        <td>{{gig[2]}}</td>
+        <td>{{gig[3]}}</td>
+        <td>{{gig[4]}}</td>
+        <td>{{gig[5]}}</td>
+        <td>{{gig[8]}}</td>
+        <td>
+            {% if gig[9]=='approved' %}
+            <button class="btn btn-primary">Collect</button>
+            {% elif gig[9]=='declined' %}
+            <button class="btn btn-danger">Returned</button>
+            {% else %}
+            <button class="btn btn-warning">Pending...</button>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

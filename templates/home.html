@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="container">
+    <div class="row">
+        {% for it in fetch %}
+        <div class="col-lg-6">
+            <div class="elements">
+                <div class="thumbnails">
+                    <img src="data:image;base64,{{it[3]}}" alt="">
+                </div>
+                <h2 style="color: aqua;">{{it[1]}}</h2>
+                <h3>Ksh {{it[2]}}</h3>
+                <a href="/book/{{it[0]}}" class="btn btn-outline-success">Book</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

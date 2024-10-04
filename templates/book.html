@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="dip">
+    
+        <form action="" method="post">
+            <h1 style="color: red; text-align: center;">Book</h1>
+            <div class="row">
+                
+                <div class="col-lg-6">
+                    <label for="">Name</label>
+                    <input type="text" name="name" placeholder="Enter your name" value="{{tap[1]}}">
+                </div>
+                <div class="col-lg-6">
+                    <label for="">Phone</label>
+                    <input type="text" name="phone" placeholder="07********" required>
+                </div>
+                <div class="col-lg-6">
+                    <label for="">Email</label>
+                    <input type="email" name="email" placeholder="Enter email" value="{{tap[2]}}">
+                </div>
+                <div class="col-lg-6">
+                    <label for="">Service</label>
+                    <input type="text" name="service" placeholder="Enter service" value="{{pie[1]}}">
+                </div>
+                <div class="col-lg-6">
+                    <label for="">Location</label>
+                    <input type="text" name="location" placeholder="Enter location" required>
+                </div>
+                <div class="col-lg-6">
+                    <label for="">Address</label>
+                    <input type="text" name="address" placeholder="Enter your house address" required>
+                </div>
+                <div class="col-lg-6">
+                    <label for="">Cost</label>
+                    <input type="text" name="cost" placeholder="Enter amount" value="{{pie[2]}}">
+                </div>
+                <div class="col-lg-12">
+                    <button type="submit" class="btn btn-outline-primary" style="margin-top: 10px;">Submit</button>
+                </div>
+            </div>
+            
+        </form>
+    
+</div>
+{% endblock %}
