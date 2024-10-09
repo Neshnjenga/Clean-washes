@@ -283,7 +283,6 @@ def book(id):
     if 'username' in session:
         user_id=session['user_id']
         if request.method=='POST':
-            
             name=request.form['name']
             phone=request.form['phone']
             email=request.form['email']
