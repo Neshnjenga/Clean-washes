@@ -6,6 +6,7 @@ import bcrypt
 import pymysql
 import secrets
 import base64
+import time
 
 app=Flask(__name__)
 app.secret_key='aesdyiuoiuigyferz'
@@ -67,36 +68,63 @@ def register():
             return render_template('register.html',username=username,email=email,password=password,confirm=confirm)
         else:
             hashed=bcrypt.hashpw(password.encode('utf-8'),bcrypt.gensalt())
+            sendAtTime=int(time.time())
             otp=randint(00000,99999)
-            cur.execute('INSERT INTO fur(username,email,password,otp)VALUES(%s,%s,%s,%s)',(username,email,hashed,otp))
+            cur.execute('INSERT INTO fur(username,email,password,otp,sendAtTime)VALUES(%s,%s,%s,%s,%s)',(username,email,hashed,otp,sendAtTime))
             connection.commit()
             subject='Account creation'
             body=f'Thank you for creating an account with clean washes.\nVerify your account with this otp {otp}'
             sendmail(subject,email,body)
             flash('Account created succesfully please verify','success')
-            return redirect(url_for('otp'))
+            return redirect(url_for('login'))
     return render_template('register.html')
 
 @app.route('/otp',methods=['POST','GET'])
 def otp():
     if request.method=='POST':
+        id=session['user_id']
         otp=request.form['otp']
-        cur.execute('SELECT * FROM fur WHERE otp=%s',(otp))
+        cur.execute('SELECT * FROM fur WHERE id=%s',(id,))
         connection.commit()
         data=cur.fetchone()
         if data is not None:
-            if data[6]==1:
-                flash('Otp already used create another otp by registering or you account has been verified','warning')
-                return redirect(url_for('login'))
+            if data[7]==int(otp):
+                currentTime=int(time.time())
+                expiryTime=int(1*60)
+                sendAtTime=int(data[10])
+                if currentTime - sendAtTime > expiryTime:
+                    flash('Otp has expried','warning')
+                    return redirect(url_for('otp'))
+                else:
+                    cur.execute('UPDATE fur SET is_verified=1 WHERE otp=%s',(otp))
+                    connection.commit()
+                    flash('Account has been verified ','success')
+                    return redirect(url_for('login'))
             else:
-                cur.execute('UPDATE fur SET is_verified=1 WHERE otp=%s',(otp))
-                connection.commit()
-                flash('Account has been verified ','success')
-                return redirect(url_for('login'))
-        else:
-            flash('Incorrect otp','warning')
-            return redirect(url_for('otp'))
-    return render_template('otp.html')
+                flash('Incorrect otp','warning')
+                return redirect(url_for('otp'))
+    cur.execute('SELECT * FROM fur WHERE id=%s',(session['user_id']))
+    connection.commit()
+    data=cur.fetchone()
+    ResendTime=int(time.time()) - int(data[10])
+    remainingTime=int(1*60) - ResendTime
+    return render_template('otp.html',remainingTime=remainingTime)
+
+@app.route('/Resend')
+def Resend():
+    id=session['user_id']
+    otp=randint(000000,999999)
+    sendAtTime=int(time.time())
+    cur.execute('SELECT * FROM fur WHERE id=%s',(id))
+    connection.commit()
+    data=cur.fetchone()
+    cur.execute('UPDATE fur SET otp=%s,sendAtTime=%s WHERE id=%s',(otp,sendAtTime,id))
+    connection.commit()
+    subject='New otp'
+    body=f'This is you new otp {otp}'
+    sendmail(subject,data[2],body)
+    flash('A new otp has been sent to your email','success')
+    return redirect(url_for('otp'))
 
 @app.route('/login',methods=['POST','GET'])
 def login():
@@ -112,18 +140,14 @@ def login():
             data=cur.fetchone()
             if data is not None:
                 if bcrypt.checkpw(password.encode('utf-8'),data[3].encode('utf-8')):
+                    session['username']=data[1]
+                    session['user_id']=data[0]
+                    session['role']=data[4]
                     if data[6]==1:
-                        # if data[5]=='token':
-                            session['username']=data[1]
-                            session['user_id']=data[0]
-                            session['role']=data[4]
                             if session['role']=='user':
                                 return redirect(url_for('home'))
                             else:
                                 return redirect(url_for('home'))
-                        # else:
-                        #     flash('please change password because u forgot your password','warning')
-                        #     return redirect(url_for('reset'))
                     else:
                         flash('Please verify your account','warning')
                         return redirect(url_for('otp'))
@@ -142,9 +166,10 @@ def forgot():
         cur.execute('SELECT * FROM fur WHERE email=%s',(email))
         data=cur.fetchone()
         if data is not None:
+            tokenSend=int(time.time())
             token=secrets.token_hex(50)
             reset_link=url_for('reset',token=token,_external=True)
-            cur.execute('UPDATE fur SET token=%s WHERE email=%s',(token,email))
+            cur.execute('UPDATE fur SET token=%s,tokenSend=%s WHERE email=%s',(token,tokenSend,email))
             connection.commit()
             subject='Forgot password'
             body=f'This is your reset link {reset_link}'
@@ -178,14 +203,21 @@ def reset():
             cur.execute('SELECT * FROM fur WHERE token=%s',(token))
             connection.commit()
             data=cur.fetchone()
-            if data is not None:
-                hashed=bcrypt.hashpw(password.encode('utf-8'),bcrypt.gensalt())
-                cur.execute('UPDATE fur SET password=%s,token="token" WHERE token=%s',(hashed,token))
-                connection.commit()
-                flash('Password has been changed','success')
-                return redirect(url_for('login'))
+            currentTime=int(time.time())
+            expiryTime=int(2*60)
+            tokenSend=data[10]
+            if currentTime - tokenSend < expiryTime:
+                if data is not None:
+                    hashed=bcrypt.hashpw(password.encode('utf-8'),bcrypt.gensalt())
+                    cur.execute('UPDATE fur SET password=%s,token="token" WHERE token=%s',(hashed,token))
+                    connection.commit()
+                    flash('Password has been changed','success')
+                    return redirect(url_for('login'))
+                else:
+                    flash('Token is already used','warning')
+                    return redirect(url_for('forgot'))
             else:
-                flash('Token is already used','warning')
+                flash('Token has expired','warning')
                 return redirect(url_for('forgot'))
     return render_template('reset.html')
 

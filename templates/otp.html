@@ -49,6 +49,38 @@
         {% endwith %}
         <input type="text" name="otp" placeholder="Enter otp" required>
         <button type="submit" class="btn btn-primary">Verify</button>
+        <p id="timer"></p>
+        <p style="display: none;" id="Resend"><a href="/Resend">Resend Link</a></p>
     </form>
+    <script>
+        var remainingTime={{remainingTime}};
+
+        function startOtpCountdown(){
+            var timer=document.getElementById('timer');
+            var Resend=document.getElementById('Resend');
+            var interval=setInterval(function(){
+                var minutes=Math.floor(remainingTime / 60);
+                var seconds=(remainingTime % 60);
+                timer.innerHTML='Otp expires in ' + minutes + ':' + seconds;
+                if (remainingTime<=0){
+                    clearInterval(interval);
+                    timer.innerHTML='Otp Expired';
+                    Resend.style.display='block';
+                }
+                else{
+                    remainingTime--;
+                }
+            },1000)
+        }
+        window.onload=function(){
+            if(remainingTime>0){
+                startOtpCountdown();
+            }
+            else{
+                document.getElementById('timer').innerHTML='Otp expired';
+                document.getElementById('Resend').style.display='block';
+            }
+        }
+    </script>
 </body>
 </html>
