@@ -235,6 +235,31 @@ def home():
         fetch.append(upload)
     return render_template('home.html',fetch=fetch)
 
+
+@app.route('/mailsend')
+def mailsend():
+    return render_template('mail.html')
+
+@app.route('/typemail',methods=['POST','GET'])
+def typemail():
+    if request.method=='POST':
+        subject=request.form['subject']
+        body=request.form['body']
+        recipient=getUsers()
+        html_content=render_template('mailcontent.html',body=body)
+        msg=Message(subject=subject,sender='chegenelson641@gmail.com',recipients=recipient)
+        msg.html=html_content
+        mail.send(msg)
+        return redirect(url_for('mailsend'))
+    return render_template('typemail.html')
+
+def getUsers():
+    cur.execute('SELECT * FROM fur')
+    connection.commit()
+    data=cur.fetchall()
+    return [user[2] for user in data]
+
+
 @app.route('/add',methods=['POST','GET'])
 def add():
     if 'username' in session:
